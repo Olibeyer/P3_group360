@@ -18,20 +18,20 @@ public:
   //Int der fortæller hvor lang beskeden i bufferen er.
   int packageBufferLength = 0;
 
-  //Init thing til classen.
+  //Init thing til classen. (Constructor)
   ProtocolController();
 
   //Pinger den given motor.
   bool ping(unsigned char address);
 
-  //Set den gældende led til ledStatus boolen.
+  //Set den gældende led til ledStatus boolean.
   void setLed(unsigned char address, bool ledStatus);
   //Henter ledens status fra motoren.
   bool getLed(unsigned char address);
 
   //tænd eller sluk for torque indistillingen.
   void toggleTorque(unsigned char address, bool onTrue);
-  //set operations mode, 0 = current mode, 1 = velocity mode, 3 = positions mode (default).
+  //set operations mode, 0 = current mode, 1 = velocity mode, 3 = position mode (default).
   void setOperatingMode(unsigned char address, int mode);
 
   //Function til at sætte motor torque.

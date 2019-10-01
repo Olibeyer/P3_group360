@@ -1,12 +1,10 @@
 #include "Protocol_2.h"
+#include "Arduino.h"
 
 ProtocolController::ProtocolController() {
-  Serial1.begin(115200);
-  pinMode(11, OUTPUT);
-  digitalWrite(11, LOW);
-}
-
-void ProtocolController::update_receiver() {
+  Serial1.begin(motorBaudrate);
+  pinMode(RTS_Pin, OUTPUT);
+  digitalWrite(RTS_Pin, LOW);
 }
 
 long ProtocolController::readFunction(unsigned char address, int tableAddress, int dataLength) {
@@ -41,11 +39,10 @@ long ProtocolController::readFunction(unsigned char address, int tableAddress, i
   }
 }
 
-
 bool ProtocolController::writeFunction(unsigned char address, unsigned char *data_blk_ptr, unsigned short data_blk_size) {
   writeReturn = false;
 
-  digitalWrite(11, HIGH);
+  digitalWrite(RTS_Pin, HIGH);
   unsigned short arrayLength = data_blk_size + 7;
   unsigned char SendingArray[arrayLength];
   SendingArray[0] = 0xFF;
@@ -70,7 +67,7 @@ bool ProtocolController::writeFunction(unsigned char address, unsigned char *dat
 
   Serial1.flush();
 
-  digitalWrite(11, LOW);
+  digitalWrite(RTS_Pin, LOW);
 
   unsigned char incomingBuffer[7];
   for (int i = 0; i < 7; i++) {
@@ -124,15 +121,19 @@ bool ProtocolController::writeFunction(unsigned char address, unsigned char *dat
 
 }
 
-void ProtocolController::ping(unsigned char address) {
+bool ProtocolController::ping(unsigned char address) {
   unsigned char SendingArray[1];
   SendingArray[0] = 0x01; //Ping Commando - Uden undertøj.
-  writeFunction(address, SendingArray, 1);
+  if (!writeFunction(address, SendingArray, 1)) {
+    Serial.println("Failed to ping: " + address);
+    return false;
+  }
+  return true;
 }
 
-void ProtocolController::ledSet(unsigned char address, bool ledStatus) {
+void ProtocolController::setLed(unsigned char address, bool ledStatus) {
   unsigned char SendingArray[4];
-  SendingArray[0] = 0x03; //Ping Commando - Uden undertøj.
+  SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
   SendingArray[1] = 0x41;
   SendingArray[2] = 0x00;
 
@@ -144,6 +145,13 @@ void ProtocolController::ledSet(unsigned char address, bool ledStatus) {
     SendingArray[3] = 0x00;
   }
   writeFunction(address, SendingArray, 4);
+}
+
+long ProtocolController::getLed(unsigned char address) {
+  if (readFunction(address, 65, 1) != 0) {
+    return true;
+  }
+  return false;
 }
 
 void ProtocolController::toggleTorque(unsigned char address, bool onTrue) {
@@ -162,6 +170,37 @@ void ProtocolController::toggleTorque(unsigned char address, bool onTrue) {
   writeFunction(address, SendingArray, 4);
 }
 
+void setOperatingMode(unsigned char address, int mode) {
+  unsigned char SendingArray[4];
+  SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
+  SendingArray[1] = 0x0B; //Field 11 - lower
+  SendingArray[2] = 0x00; //Filed 11 - higher
+  SendingArray[3] = (unsigned char)mode;
+
+  writeFunction(address, SendingArray, 4);
+}
+
+void setGoalCurrent(unsigned char address, short current) {
+  unsigned char SendingArray[5];
+  SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
+  SendingArray[1] = 0x66; 
+  SendingArray[2] = 0x00; 
+  SendingArray[3] = current & 0x00FF;
+  SendingArray[4] = (current >> 8) & 0x00FF;
+
+  writeFunction(address, SendingArray, 5);
+}
+
+void setCurrentLimit(unsigned char address, short current) {
+  unsigned char SendingArray[5];
+  SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
+  SendingArray[1] = 0x26; 
+  SendingArray[2] = 0x00;
+  SendingArray[3] = current & 0x00FF;
+  SendingArray[4] = (current >> 8) & 0x00FF;
+
+  writeFunction(address, SendingArray, 5);
+}
 
 void ProtocolController::setPos(unsigned char address, long setPosition) {
   unsigned char SendingArray[7];
@@ -175,6 +214,10 @@ void ProtocolController::setPos(unsigned char address, long setPosition) {
   SendingArray[6] = 0x00;
 
   writeFunction(address, SendingArray, 7);
+}
+
+long ProtocolController::getPos(unsigned char address) {
+  return readFunction(address, 132, 4);
 }
 
 unsigned short ProtocolController::update_crc(unsigned short crc_accum, unsigned char *data_blk_ptr, unsigned short data_blk_size)

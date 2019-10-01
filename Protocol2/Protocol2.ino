@@ -47,7 +47,7 @@ void loop() {
     digitalWrite(13, !digitalRead(13));
     up = !up;
     Serial.println(controler_ptr->readFunction(0x01, 65, 1));
-    controler_ptr->ledSet(0x01, up);
+    controler_ptr->setLed(0x01, up);
     Serial.println(controler_ptr->readFunction(0x01, 65, 1));
     Serial.println(millis()-oldTime);
   }

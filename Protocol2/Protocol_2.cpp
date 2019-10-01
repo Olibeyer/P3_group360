@@ -210,8 +210,8 @@ void ProtocolController::setPos(unsigned char address, long setPosition) {
 
   SendingArray[3] = setPosition & 0x00FF;
   SendingArray[4] = (setPosition >> 8) & 0x00FF;
-  SendingArray[5] = 0x00;
-  SendingArray[6] = 0x00;
+  SendingArray[5] = (setPosition >> 16) & 0x00FF;;
+  SendingArray[6] = (setPosition >> 24) & 0x00FF;;
 
   writeFunction(address, SendingArray, 7);
 }

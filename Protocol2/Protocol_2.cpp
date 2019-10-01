@@ -147,7 +147,7 @@ void ProtocolController::setLed(unsigned char address, bool ledStatus) {
   writeFunction(address, SendingArray, 4);
 }
 
-long ProtocolController::getLed(unsigned char address) {
+bool ProtocolController::getLed(unsigned char address) {
   if (readFunction(address, 65, 1) != 0) {
     return true;
   }
@@ -170,7 +170,7 @@ void ProtocolController::toggleTorque(unsigned char address, bool onTrue) {
   writeFunction(address, SendingArray, 4);
 }
 
-void setOperatingMode(unsigned char address, int mode) {
+void ProtocolController::setOperatingMode(unsigned char address, int mode) {
   unsigned char SendingArray[4];
   SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
   SendingArray[1] = 0x0B; //Field 11 - lower
@@ -180,7 +180,7 @@ void setOperatingMode(unsigned char address, int mode) {
   writeFunction(address, SendingArray, 4);
 }
 
-void setGoalCurrent(unsigned char address, short current) {
+void ProtocolController::setGoalCurrent(unsigned char address, short current) {
   unsigned char SendingArray[5];
   SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
   SendingArray[1] = 0x66; 
@@ -191,7 +191,7 @@ void setGoalCurrent(unsigned char address, short current) {
   writeFunction(address, SendingArray, 5);
 }
 
-void setCurrentLimit(unsigned char address, short current) {
+void ProtocolController::setCurrentLimit(unsigned char address, short current) {
   unsigned char SendingArray[5];
   SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
   SendingArray[1] = 0x26; 

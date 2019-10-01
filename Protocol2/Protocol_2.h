@@ -7,7 +7,6 @@ const int sRecRX = 2;
 const int sTranTX = 3;
 const int SControl = 4;   //RS485 Direction control
 const int Pin13LED = 13;
-const int Baudrate = 57600;
 
 class ProtocolController {
 public:
@@ -18,7 +17,10 @@ public:
   void setPos(unsigned char address, long setPosition);
   bool writeFunction(unsigned char address, unsigned char *data_blk_ptr, unsigned short data_blk_size);
   void update_receiver();
+  long readFunction(unsigned char address, int tableAdress, int dataLength);
 
+  bool getLed(unsigned char address);
+  
   bool writeReturn = false;
 
   unsigned char packageBuffer[255];

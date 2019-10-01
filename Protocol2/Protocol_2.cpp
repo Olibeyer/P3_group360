@@ -1,13 +1,46 @@
 #include "Protocol_2.h"
 
 ProtocolController::ProtocolController() {
-  Serial1.begin(57600);
+  Serial1.begin(115200);
   pinMode(11, OUTPUT);
   digitalWrite(11, LOW);
 }
 
 void ProtocolController::update_receiver() {
 }
+
+long ProtocolController::readFunction(unsigned char address, int tableAddress, int dataLength) {
+
+  unsigned char data[5];     //instruction + 4 parameters
+  data[0] = 0x02;    //read instruction
+  data[1] = tableAddress & 0xFF;
+  data[2] = tableAddress >> 8;
+  data[3] = dataLength & 0x0F;
+  data[4] = dataLength >> 8;
+
+
+  if (writeFunction(address, data, 5)) //try to write, if fail return -1
+  {
+    unsigned char readData[dataLength];
+    for (int i = 0; i < dataLength; i++) //get data from buffer
+    {
+      readData[i] = packageBuffer[i+9];
+    }
+        
+    long returnValue = 0;
+    for (int i = 0; i < dataLength; i++) //arrange data in long variable
+    {
+      returnValue = returnValue | (readData[i]<<8*i);
+    }
+    return returnValue;
+  }
+  else
+  {
+    //Serial.println("Failed to read!");
+    return -1;
+  }
+}
+
 
 bool ProtocolController::writeFunction(unsigned char address, unsigned char *data_blk_ptr, unsigned short data_blk_size) {
   writeReturn = false;
@@ -67,11 +100,13 @@ bool ProtocolController::writeFunction(unsigned char address, unsigned char *dat
       packageBuffer[j] = Serial1.read();
     }
 
+    /*
+    Serial.print("response, packageBuffer: ");
     for (int j = 0; j < packageBufferLength; j++) {
       Serial.print(packageBuffer[j], HEX);
       Serial.print(" ");
     }
-    Serial.println();
+    */
     unsigned short calculatedCRC = update_crc(0, packageBuffer, packageBufferLength - 2);
 
     if ((packageBuffer[packageBufferLength - 1] == (calculatedCRC >> 8) & 0x00FF) && (packageBuffer[packageBufferLength - 2] == (unsigned char)calculatedCRC & 0x00FF))

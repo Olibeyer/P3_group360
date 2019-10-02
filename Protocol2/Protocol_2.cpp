@@ -73,7 +73,8 @@ bool ProtocolController::writeFunction(unsigned char address, unsigned char *dat
   for (int i = 0; i < 7; i++) {
     long startTime = millis();
     while (!Serial1.available()) {
-      if (millis() > startTime + 1000) {
+      if (millis() > startTime + 50) {  //time-out after 50ms
+        Serial.println("time-out on packet recieve");
         return false;
       }
     }

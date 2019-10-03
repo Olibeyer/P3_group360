@@ -13,28 +13,29 @@ long ProtocolController::readFunction(unsigned char address, int tableAddress, i
   data[0] = 0x02;    //read instruction
   data[1] = tableAddress & 0xFF;
   data[2] = tableAddress >> 8;
-  data[3] = dataLength & 0x0F;
+  data[3] = dataLength & 0xFF;
   data[4] = dataLength >> 8;
 
 
   if (writeFunction(address, data, 5)) //try to write, if fail return -1
   {
     unsigned char readData[dataLength];
+
     for (int i = 0; i < dataLength; i++) //get data from buffer
     {
-      readData[i] = packageBuffer[i+9];
+      readData[i] = packageBuffer[i + 9];
     }
-        
+
     long returnValue = 0;
     for (int i = 0; i < dataLength; i++) //arrange data in long variable
     {
-      returnValue = returnValue | (readData[i]<<8*i);
+      returnValue = returnValue | (readData[i] << 8 * i);
     }
     return returnValue;
   }
   else
   {
-    //Serial.println("Failed to read!");
+    Serial.println("Failed to read!");
     return -1;
   }
 }
@@ -51,7 +52,7 @@ bool ProtocolController::writeFunction(unsigned char address, unsigned char *dat
   SendingArray[3] = 0x00;
   SendingArray[4] = address;
   unsigned short MesLength = data_blk_size + 2;
-  SendingArray[5] = MesLength & 0x0F;
+  SendingArray[5] = MesLength & 0xFF;
   SendingArray[6] = MesLength >> 8;
 
   for (int i = 7; i < arrayLength; i++) {
@@ -59,6 +60,7 @@ bool ProtocolController::writeFunction(unsigned char address, unsigned char *dat
   }
 
   unsigned short crc_int = update_crc(0, SendingArray, arrayLength);
+
   for (int i = 0; i < arrayLength; i++) {
     Serial1.write(SendingArray[i]);
   }
@@ -99,11 +101,11 @@ bool ProtocolController::writeFunction(unsigned char address, unsigned char *dat
     }
 
     /*
-    Serial.print("response, packageBuffer: ");
-    for (int j = 0; j < packageBufferLength; j++) {
+      Serial.print("response, packageBuffer: ");
+      for (int j = 0; j < packageBufferLength; j++) {
       Serial.print(packageBuffer[j], HEX);
       Serial.print(" ");
-    }
+      }
     */
     unsigned short calculatedCRC = update_crc(0, packageBuffer, packageBufferLength - 2);
 
@@ -134,7 +136,7 @@ bool ProtocolController::ping(unsigned char address) {
 
 void ProtocolController::setLed(unsigned char address, bool ledStatus) {
   unsigned char SendingArray[4];
-  SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
+  SendingArray[0] = 0x03; //Write Commando
   SendingArray[1] = 0x41;
   SendingArray[2] = 0x00;
 
@@ -157,7 +159,7 @@ bool ProtocolController::getLed(unsigned char address) {
 
 void ProtocolController::toggleTorque(unsigned char address, bool onTrue) {
   unsigned char SendingArray[4];
-  SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
+  SendingArray[0] = 0x03; //Write Commando
   SendingArray[1] = 0x40;
   SendingArray[2] = 0x00;
 
@@ -173,7 +175,7 @@ void ProtocolController::toggleTorque(unsigned char address, bool onTrue) {
 
 void ProtocolController::setOperatingMode(unsigned char address, int mode) {
   unsigned char SendingArray[4];
-  SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
+  SendingArray[0] = 0x03; //Write Commando
   SendingArray[1] = 0x0B; //Field 11 - lower
   SendingArray[2] = 0x00; //Filed 11 - higher
   SendingArray[3] = (unsigned char)mode;
@@ -183,9 +185,9 @@ void ProtocolController::setOperatingMode(unsigned char address, int mode) {
 
 void ProtocolController::setGoalCurrent(unsigned char address, short current) {
   unsigned char SendingArray[5];
-  SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
-  SendingArray[1] = 0x66; 
-  SendingArray[2] = 0x00; 
+  SendingArray[0] = 0x03; //Write Commando
+  SendingArray[1] = 0x66;
+  SendingArray[2] = 0x00;
   SendingArray[3] = current & 0x00FF;
   SendingArray[4] = (current >> 8) & 0x00FF;
 
@@ -194,8 +196,8 @@ void ProtocolController::setGoalCurrent(unsigned char address, short current) {
 
 void ProtocolController::setCurrentLimit(unsigned char address, short current) {
   unsigned char SendingArray[5];
-  SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
-  SendingArray[1] = 0x26; 
+  SendingArray[0] = 0x03; //Write Commando
+  SendingArray[1] = 0x26;
   SendingArray[2] = 0x00;
   SendingArray[3] = current & 0x00FF;
   SendingArray[4] = (current >> 8) & 0x00FF;
@@ -205,7 +207,7 @@ void ProtocolController::setCurrentLimit(unsigned char address, short current) {
 
 void ProtocolController::setPos(unsigned char address, long setPosition) {
   unsigned char SendingArray[7];
-  SendingArray[0] = 0x03; //Write Commando - Uden undertøj.
+  SendingArray[0] = 0x03; //Write Commando
   SendingArray[1] = 0x74;
   SendingArray[2] = 0x00;
 

@@ -16,14 +16,14 @@ void setup() {
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
 
-  initMotors();
 
   delay(100);
 }
 
 void loop() {
 
-  playMotors();
+
+
 
   digitalWrite(13, !digitalRead(13));
 }

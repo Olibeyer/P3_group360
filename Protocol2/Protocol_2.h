@@ -44,6 +44,8 @@ class ProtocolController {
     //Få motors position.
     long getPos(unsigned char address);
 
+    //Set position PGain
+    void ProtocolController::setPosPGain(unsigned char addres, int pGain);
 
 
 

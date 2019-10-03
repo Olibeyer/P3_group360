@@ -213,10 +213,23 @@ void ProtocolController::setPos(unsigned char address, long setPosition) {
 
   SendingArray[3] = setPosition & 0x00FF;
   SendingArray[4] = (setPosition >> 8) & 0x00FF;
-  SendingArray[5] = (setPosition >> 16) & 0x00FF;;
-  SendingArray[6] = (setPosition >> 24) & 0x00FF;;
+  SendingArray[5] = (setPosition >> 16) & 0x00FF;
+  SendingArray[6] = (setPosition >> 24) & 0x00FF;
 
   writeFunction(address, SendingArray, 7);
+}
+
+void ProtocolController::setPosPGain(unsigned char address, int pGain)
+{
+  unsigned char SendingArray[5];
+  SendingArray[0] = 0x03; //Write Commando
+  SendingArray[1] = 84;
+  SendingArray[2] = 0x00;
+
+  SendingArray[3] = pGain & 0x00FF;
+  SendingArray[4] = (pGain >> 8) & 0x00FF;
+
+  writeFunction(address, SendingArray, 5);
 }
 
 long ProtocolController::getPos(unsigned char address) {

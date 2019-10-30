@@ -71,7 +71,7 @@ find_package(catkin REQUIRED COMPONENTS
 # generate_messages(
 #   DEPENDENCIES
 #   std_msgs
-# )
+#)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -116,7 +116,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -149,6 +149,19 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+
+add_executable(myo_com src/myo_com.cpp)
+target_link_libraries(myo_com ${catkin_LIBRARIES})
+add_dependencies(myo_com crustcrawler_generate_messages_cpp)
+
+add_executable(master src/master.cpp)
+target_link_libraries(master ${catkin_LIBRARIES})
+add_dependencies(master crustcrawler_generate_messages_cpp)
+
+add_executable(arduino_serial src/arduino_serial.cpp)
+target_link_libraries(arduino_serial ${catkin_LIBRARIES})
+add_dependencies(arduino_serial crustcrawler_generate_messages_cpp)
+
 
 #############
 ## Install ##

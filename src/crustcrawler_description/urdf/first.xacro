@@ -17,7 +17,7 @@
   <link name="link1">
     <visual>
       <geometry>
-        <mesh filename="package://crustcrawler_description/meshes/BaseLink.STL"/>
+        <box size="${L2} ${LinkWidth} ${LinkWidth}"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 ${-L1+L1/2}"/>
     </visual>

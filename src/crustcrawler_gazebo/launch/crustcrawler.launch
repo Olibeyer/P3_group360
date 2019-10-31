@@ -4,4 +4,7 @@
     <arg name="world_name" value="$(find crustcrawler_gazebo)/worlds/crustcrawler.world"/>
     <!-- more default parameters can be changed here -->
   </include>
+<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-file $(find baxter_description)/urdf/baxter.urdf -urdf -z 1 -model baxter" />
+
+
 </launch>

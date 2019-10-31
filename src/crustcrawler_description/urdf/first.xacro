@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="CrustCrawler">
+  <xacro:property name="pi" value="3.1415" />
+  <xacro:property name="LinkWidth" value="0.01" />
+  <xacro:property name="L1" value="0.055" /> 
+  <xacro:property name="L2" value="0.22" /> 
+  <xacro:property name="Lcp" value="0.15" /> 
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder length="0" radius="0.1"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </visual>
+  </link>
+
+  <link name="link1">
+    <visual>
+      <geometry>
+        <box size="${LinkWidth} ${LinkWidth} ${L1}"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 ${-L1+L1/2}"/>
+    </visual>
+  </link>
+  
+  <link name="link2">
+    <visual>
+      <geometry>
+        <box size="${L2} ${LinkWidth} ${LinkWidth}"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="${L2/2} 0 0"/>
+    </visual>
+  </link>
+  
+  <link name="link3">
+    <visual>
+      <geometry>
+        <box size="${Lcp} ${LinkWidth} ${LinkWidth}"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="${Lcp/2} 0 0"/>
+    </visual>
+  </link>
+
+  <joint name="FirstJoint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="0.0" upper="${pi*2}" velocity="0.5"/>
+    <parent link="base_link"/>
+    <child link="link1"/>
+    <origin xyz="0 0 ${L1}"/>
+  </joint>
+
+  <joint name="SecondJoint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-0.3" upper="${pi}" velocity="0.5"/>
+    <parent link="link1"/>
+    <child link="link2"/>
+    <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+  </joint>
+
+  <joint name="ThirdJoint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="2.8" upper="-3" velocity="0.5"/>
+    <parent link="link2"/>
+    <child link="link3"/>
+    <origin xyz="${L2} 0 0" rpy="0 0 0"/>
+  </joint>
+
+</robot>

@@ -85,14 +85,14 @@
     <collision>
       <origin xyz="0 0 ${L1/2}" rpy="0 0 0"/>
       <geometry>
-        <box size="${LinkWidth} ${LinkWidth} ${L1}"/>
+	<box size="${LinkWidth} ${LinkWidth} ${L1}"/>
       </geometry>
     </collision>
 
     <visual>
       <origin xyz="0 0 ${L1/2}" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://crustcrawler_description/meshes/Link1.STL"/>
+	<box size="${LinkWidth} ${LinkWidth} ${L1}"/>
       </geometry>
     </visual>
 

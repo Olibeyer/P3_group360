@@ -10,8 +10,9 @@ project(crustcrawler)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  sensor_msgs
   std_msgs
-)
+  tf)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -161,6 +162,10 @@ add_dependencies(master crustcrawler_generate_messages_cpp)
 add_executable(arduino_serial src/arduino_serial.cpp)
 target_link_libraries(arduino_serial ${catkin_LIBRARIES})
 add_dependencies(arduino_serial crustcrawler_generate_messages_cpp)
+
+add_executable(state_publisher src/state_publisher.cpp)
+target_link_libraries(state_publisher ${catkin_LIBRARIES})
+add_dependencies(state_publisher crustcrawler_generate_messages_cpp)
 
 
 #############

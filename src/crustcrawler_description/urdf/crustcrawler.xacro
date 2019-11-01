@@ -1,136 +1,184 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="CrustCrawler">
+<robot name="CrustCrawler" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:property name="M_pi" value="3.1415" />
   <xacro:property name="LinkWidth" value="0.01" />
-  
-  <xacro:property name="L1" value="0.055" /> 
-  <xacro:property name="L2" value="0.22" /> 
-  <xacro:property name="Lcp" value="0.15" />
+  <xacro:property name="offset" value="0.0" />
 
-  <xacro:property name="Lc" value="0.05875" /> 
-  <xacro:property name="Lc2" value="0.17433" /> 
-  <xacro:property name="Lc3" value="0.12078" /> 
 
-  <xacro:property name="m1" value="0.22501148645" /> 
-  <xacro:property name="m2" value="0.21285774246" /> 
-  <xacro:property name="m3" value="0.28725035108" /> 
-  <xacro:property name="mp" value="0.0" /> 
+  <xacro:property name="L0" value="0.01" />
+  <xacro:property name="L1" value="0.055" />
+  <xacro:property name="L2" value="0.22" />
+  <xacro:property name="L3" value="0.15" />
+  <xacro:property name="Lp" value="0.0" />
 
-  <link name="base_link">
-    <visual>
+
+  <xacro:property name="Lc" value="0.05875" />
+  <xacro:property name="Lc2" value="0.17433" />
+  <xacro:property name="Lc3" value="0.12078" />
+
+  <xacro:property name="m1" value="0.22501148645" />
+  <xacro:property name="m2" value="0.21285774246" />
+  <xacro:property name="m3" value="0.28725035108" />
+  <xacro:property name="mp" value="0.0" />
+
+
+  <link name="world"/>
+
+  <joint name="world_base" type="fixed">
+    <parent link="world"/>
+    <child link="base"/>
+  </joint>
+
+  <link name="base">
+    <collision>
+      <origin xyz="0 0 ${L0/2}" rpy="0 0 0"/>
       <geometry>
-        <cylinder length="0" radius="0.1"/>
+	<box size="${LinkWidth} ${LinkWidth} ${L0}"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 ${L0/2}" rpy="0 0 0"/>
+      <geometry>
+	<box size="${LinkWidth} ${LinkWidth} ${L0}"/>
+  <cylinder length="0.1" radius="0.1"/>
+      </geometry>
+    </visual>
+
+    <inertial>
+      <origin xyz="0 0 ${L0/2}" rpy="0 0 0"/>
+      <mass value="${m1}"/>
+      <inertia
+	  ixx="0.0" ixy="0.0" ixz="0.0"
+	  iyy="0.0" iyz="0.0"
+	  izz="0.0"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_1" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="${-M_pi}" upper="${M_pi}" velocity="0.5"/>
+    <parent link="base"/>
+    <child link="link1"/>
+    <origin xyz="0 0 ${L0}" rpy= "0 0 0"/>
+  </joint>
+
+  <!-- Turntable -->
+
+  <joint name="turntable" type="fixed">
+    <parent link="base"/>
+    <child link="turntable"/>
+  </joint>
+
+  <link name="turntable">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+  <cylinder length="0.01" radius="0.04"/>
+      </geometry>
     </visual>
   </link>
+
+  <!-- link 1 -->
 
   <link name="link1">
-    <visual>
+    <collision>
+      <origin xyz="0 0 ${L1/2}" rpy="0 0 0"/>
       <geometry>
-        <box size="${LinkWidth} ${LinkWidth} ${L1}"/>
+	<box size="${LinkWidth} ${LinkWidth} ${L1}"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 ${-L1+L1/2}"/>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 ${L1/2}" rpy="0 0 0"/>
+      <geometry>
+	<box size="${LinkWidth} ${LinkWidth} ${L1}"/>
+      </geometry>
     </visual>
 
-    <collision>
-      <geometry>
-        <box size="${L2} ${LinkWidth} ${LinkWidth}"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 ${-L1+L1/2}"/>
-    </collision>
-    
     <inertial>
+      <origin xyz="0 0 ${Lc}" rpy="0 0 0"/>
       <mass value="${m1}"/>
-      <origin rpy="0 0 0" xyz="0 0 ${-L1+Lc}"/>
-      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
-    </inertial>
-  </link>
-  
-  <link name="link2">
-    <visual>
-      <geometry>
-        <box size="${L2} ${LinkWidth} ${LinkWidth}"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="${L2/2} 0 0"/>
-    </visual>
-
-    <collision>
-      <geometry>
-        <box size="${L2} ${LinkWidth} ${LinkWidth}"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="${L2/2} 0 0"/>
-    </collision>
-
-    <inertial>
-      <mass value="${m2}"/>
-      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
-    </inertial>
-  </link>
-  
-  <link name="link3">
-    <visual>
-      <geometry>
-        <box size="${Lcp} ${LinkWidth} ${LinkWidth}"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="${Lcp/2} 0 0"/>
-    </visual>
-
-    <collision>
-      <geometry>
-        <box size="${Lcp} ${LinkWidth} ${LinkWidth}"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="${Lcp/2} 0 0"/>
-    </collision>
-
-    <inertial>
-      <mass value="${m3}"/>
-      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+      <inertia
+	  ixx="1.0" ixy="0.0" ixz="0.0"
+	  iyy="1.0" iyz="0.0"
+	  izz="1.0"/>
     </inertial>
   </link>
 
-  <link name="link4">
-    <visual>
-      <geometry>
-        <box size="${LinkWidth} ${LinkWidth} ${LinkWidth}"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-    </visual>
 
-    <inertial>
-      <mass value="${mp}"/>
-      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
-    </inertial>
-  </link>
 
-  <joint name="FirstJoint" type="revolute">
+  <joint name="joint_2" type="revolute">
+    <origin xyz="0 0 ${L1}" rpy="${M_pi / 2} 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit effort="1000.0" lower="0.0" upper="${M_pi*2}" velocity="0.5"/>
-    <parent link="base_link"/>
-    <child link="link1"/>
-    <origin xyz="0 0 ${L1}"/>
-  </joint>
-
-  <joint name="SecondJoint" type="revolute">
-    <axis xyz="0 0 1"/>
-    <limit effort="1000.0" lower="-0.3" upper="${M_pi}" velocity="0.5"/>
+    <limit effort="1000.0" lower="${-M_pi/4}" upper="${M_pi*5/4}" velocity="0.5"/>
     <parent link="link1"/>
     <child link="link2"/>
-    <origin xyz="0 0 0" rpy="${M_pi/2} 0 0"/>
   </joint>
 
-  <joint name="ThirdJoint" type="revolute">
+  <!-- link 2 -->
+  <link name="link2">
+    <collision>
+      <origin xyz="${L2/2} 0 0" rpy="0 0 0"/>
+      <geometry>
+	<box size="${L2} ${LinkWidth} ${LinkWidth}"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="${L2/2} 0 ${offset}" rpy="0 0 0"/>
+      <geometry>
+	<box size="${L2} ${LinkWidth} ${LinkWidth}"/>
+      </geometry>
+    </visual>
+
+    <inertial>
+      <origin xyz="${Lc2} 0 0" rpy="0 0 0"/>
+      <mass value="${m2}"/>
+      <inertia
+	  ixx="1.0" ixy="0.0" ixz="0.0"
+	  iyy="1.0" iyz="0.0"
+	  izz="1.0"/>
+    </inertial>
+  </link>
+
+
+
+  <joint name="joint_3" type="revolute">
     <axis xyz="0 0 1"/>
-    <limit effort="1000.0" lower="2.8" upper="-3" velocity="0.5"/>
+    <limit effort="1000.0" lower="${-M_pi*3/4}" upper="${M_pi*3/4}" velocity="0.5"/>
     <parent link="link2"/>
     <child link="link3"/>
     <origin xyz="${L2} 0 0" rpy="0 0 0"/>
   </joint>
 
-  <joint name="PayloadJoint" type="fixed">
-    <parent link="link3"/>
-    <child link="link4"/>
-    <origin xyz="${Lcp} 0 0" rpy="0 0 0"/>
-  </joint>
+
+  <!-- link 3 -->
+
+
+  <link name="link3">
+    <collision>
+      <origin xyz="${L3/2} 0 0" rpy="0 0 0"/>
+      <geometry>
+  <box size=" ${L3} ${LinkWidth} ${LinkWidth}"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="${L3/2} 0 0" rpy="0 0 0"/>
+      <geometry>
+  <box size="${L3} ${LinkWidth} ${LinkWidth} "/>
+      </geometry>
+    </visual>
+
+    <inertial>
+      <origin xyz="${Lc3} 0 0 " rpy="0 0 0"/>
+      <mass value="${m3}"/>
+      <inertia
+    ixx="1.0" ixy="0.0" ixz="0.0"
+    iyy="1.0" iyz="0.0"
+    izz="1.0"/>
+    </inertial>
+  </link>
 
 </robot>

@@ -22,6 +22,18 @@
   <xacro:property name="mp" value="0.0" />
 
 
+  <!-- Gazebo -->
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/crustcrawler</robotNamespace>
+    </plugin>
+  </gazebo>
+
+
+
+  <!-- links, joints and transmissions -->
+
+
   <link name="world"/>
 
   <joint name="world_base" type="fixed">
@@ -56,7 +68,7 @@
     </inertial>
   </link>
 
-  <joint name="joint_1" type="revolute">
+  <joint name="joint1" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="${-M_pi}" upper="${M_pi}" velocity="0.5"/>
     <parent link="base"/>
@@ -64,22 +76,17 @@
     <origin xyz="0 0 ${L0}" rpy= "0 0 0"/>
   </joint>
 
-  <!-- Turntable
+  <transmission name="tran1">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint1">
+      <hardwareInterface>EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor1">
+      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
 
-  <joint name="turntable" type="fixed">
-    <parent link="base"/>
-    <child link="turntable"/>
-  </joint>
-
-  <link name="turntable">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-  <cylinder length="0.01" radius="0.04"/>
-      </geometry>
-    </visual>
-  </link>
-  -->
   <!-- link 1 -->
 
   <link name="link1">
@@ -109,7 +116,7 @@
 
 
 
-  <joint name="joint_2" type="revolute">
+  <joint name="joint2" type="revolute">
     <origin xyz="0 0 ${L1}" rpy="${M_pi / 2} 0 0"/>
     <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="${-M_pi/4}" upper="${M_pi*5/4}" velocity="0.5"/>
@@ -145,7 +152,7 @@
 
 
 
-  <joint name="joint_3" type="revolute">
+  <joint name="joint3" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="${-M_pi*3/4}" upper="${M_pi*3/4}" velocity="0.5"/>
     <parent link="link2"/>
@@ -183,7 +190,7 @@
   </link>
 
 
-  <joint name="joint_4" type="revolute">
+  <joint name="joint4" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="${-M_pi*3/4}" upper="${M_pi*3/4}" velocity="0.5"/>
     <parent link="link3"/>
@@ -191,7 +198,7 @@
     <origin xyz="${L3 - 0.003} 0 0.016" rpy="${-M_pi/2} 0 0"/>
   </joint>
 
-  <joint name="joint_5" type="revolute">
+  <joint name="joint5" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="${-M_pi*3/4}" upper="${M_pi*3/4}" velocity="0.5"/>
     <parent link="link3"/>

@@ -77,15 +77,16 @@
     <parent link="base"/>
     <child link="link1"/>
     <origin xyz="0 0 ${L0}" rpy= "0 0 0"/>
+    <dynamics damping="1.0"/>
   </joint>
 
   <transmission name="tran1">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="joint1">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor1">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
@@ -125,6 +126,7 @@
     <limit effort="1000.0" lower="${-M_pi/4}" upper="${M_pi*5/4}" velocity="0.5"/>
     <parent link="link1"/>
     <child link="link2"/>
+    <dynamics damping="1.0"/>
   </joint>
 
   <!-- link 2 -->
@@ -161,6 +163,7 @@
     <parent link="link2"/>
     <child link="link3"/>
     <origin xyz="${L2} 0 0" rpy="0 0 0"/>
+    <dynamics damping="1.0"/>
   </joint>
 
 
@@ -199,6 +202,7 @@
     <parent link="link3"/>
     <child link="gripper_left"/>
     <origin xyz="${L3 - 0.003} 0 0.016" rpy="${-M_pi/2} 0 0"/>
+    <dynamics damping="1.0"/>
   </joint>
 
   <joint name="joint5" type="revolute">
@@ -207,6 +211,7 @@
     <parent link="link3"/>
     <child link="gripper_right"/>
     <origin xyz="${L3 - 0.003} 0 -0.016" rpy="${-M_pi/2} 0 0"/>
+    <dynamics damping="1.0"/>
   </joint> -->
 
   <!-- left gripper -->

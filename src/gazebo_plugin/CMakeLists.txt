@@ -103,7 +103,7 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
+#  INCLUDE_DIRS include
   LIBRARIES gazebo_plugin
   CATKIN_DEPENDS gazebo_ros roscpp
 #  DEPENDS system_lib

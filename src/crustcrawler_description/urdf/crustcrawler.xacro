@@ -57,7 +57,7 @@
       <origin xyz="0 0 ${-L1/2}" rpy="0 0 0"/>
       <geometry>
          <mesh filename="package://crustcrawler_description/meshes/Base.STL"/>           <!-- <box size="${LinkWidth} ${LinkWidth} ${L0}"/> -->
-  <cylinder length="0.1" radius="0.1"/>
+         <!--cylinder length="0.1" radius="0.1"/-->
       </geometry>
     </visual>
 

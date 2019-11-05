@@ -74,8 +74,8 @@ public:
             return;
         }
         ros::Time currentTime = ros::Time::now();
-        //if (currentTime.nsec - prevRun.nsec > (1.0 / 30.0) * 1000000000.0)
-        if (currentTime.toSec() - prevRun.toSec() > (3.0))
+        if (currentTime.nsec - prevRun.nsec > (1.0 / 30.0) * 1000000000.0)
+        //if (currentTime.toSec() - prevRun.toSec() > (3.0))
         {
             prevRun = ros::Time::now();
             std_msgs::Float64MultiArray msg;
@@ -92,7 +92,7 @@ public:
 
     void torqueUpdater(const std_msgs::Float64MultiArray& incoming) {
         for (int i = 0; i < 5; i++ ) {
-            joints[i]->SetVelocity(0, incoming.data[i]);
+            joints[i]->SetForce(0, incoming.data[i]);
         }
     }
 };

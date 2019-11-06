@@ -2,6 +2,7 @@
 #define CRUSTCRAWLER_CONTROL
 
 #include <functional>
+#include "boost/bind.hpp"
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/Plugin.hh>
@@ -21,6 +22,7 @@ class CrustCrawlerPlugin : public ModelPlugin
     event::ConnectionPtr updateConnection;
     ros::Time prevRun;
     physics::ModelPtr crustyModel;
+    double jointsLastAngle[5] = {0, 0, 0, 0, 0};
 
 public:
     CrustCrawlerPlugin() : ModelPlugin()
@@ -49,10 +51,10 @@ public:
         }
 
         n = new ros::NodeHandle();
-        anglePublisher = n->advertise<std_msgs::Float64MultiArray>("/crustcrawler/getjointangles", 1);
-        angleSubscriber = n->subscribe("/crustcrawler/setjointtorques", 1, &CrustCrawlerPlugin::torqueUpdater, this);
-        
-        ROS_INFO("____________________________________YO______________________________________");
+        anglePublisher = n->advertise<std_msgs::Float64MultiArray>("/crustcrawler/getAngleVel", 1);
+        angleSubscriber = n->subscribe("/crustcrawler/setTorques", 1, &CrustCrawlerPlugin::torqueUpdater, this);
+
+        ROS_INFO("CrustCrawler Plugin has started, and is ready for combat!");
         ROS_INFO_STREAM("The plugin is attach to model: " << _model->GetName());
 
         joints[0] = _model->GetJoint("joint1");
@@ -79,19 +81,24 @@ public:
         {
             prevRun = ros::Time::now();
             std_msgs::Float64MultiArray msg;
-            msg.data.resize(5);
+            msg.data.resize(10);
             for (int i = 0; i < 5; i++)
             {
-                ignition::math::Quaternion<double> currentErrorPose = joints[i]->AnchorErrorPose().Rot();
-                msg.data[i] = currentErrorPose.Roll();
+                int dataIndex = (i * 2);
+                double currentErrorPose = joints[i]->Position(0);
+                msg.data[dataIndex] = currentErrorPose;
+                msg.data[dataIndex + 1] = jointsLastAngle[i] - currentErrorPose;
+                jointsLastAngle[i] = currentErrorPose;
             }
             anglePublisher.publish(msg);
             ros::spinOnce();
         }
     }
 
-    void torqueUpdater(const std_msgs::Float64MultiArray& incoming) {
-        for (int i = 0; i < 5; i++ ) {
+    void torqueUpdater(const std_msgs::Float64MultiArray &incoming)
+    {
+        for (int i = 0; i < 5; i++)
+        {
             joints[i]->SetForce(0, incoming.data[i]);
         }
     }

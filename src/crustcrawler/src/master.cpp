@@ -67,10 +67,10 @@ void myo_raw_gest_str_callback(const std_msgs::String::ConstPtr& msg){
     }
   }
 }
-
+/*
 //Takes the current joint angles and velocities
 void get_angle_vel_callback(const std_msgs::Float64MultiArray::ConstPtr& msg){
-  float data[] = msg->data;
+  vector<double> *data = &msg->data;
   float theta[5];
   float thetadot[5];
   int j = 0;
@@ -82,9 +82,9 @@ void get_angle_vel_callback(const std_msgs::Float64MultiArray::ConstPtr& msg){
 }
 <<<<<<< HEAD
 =======
-*/
->>>>>>> 4329c16904ef11c190a62d8236f99545fd7f4cb6
 
+>>>>>>> 4329c16904ef11c190a62d8236f99545fd7f4cb6
+*/
 int main(int argc, char** argv) {
   ros::init(argc, argv, "state_publisher");
   ros::NodeHandle n;
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
   ros::Publisher joint_pub = n.advertise<sensor_msgs::JointState>("joint_states", 1);
   ros::Subscriber pose_sub = n.subscribe("myo_raw/pose", 10, myo_raw_pose_callback);
   ros::Subscriber gest_str_sub = n.subscribe("myo_raw/myo_gest_str", 10, myo_raw_gest_str_callback);
-  ros::Subscriber get_angle_vel = n.subscribe("/crustcrawler/getAngleVel", 10, get_angle_vel_callback);
+  //ros::Subscriber get_angle_vel = n.subscribe("/crustcrawler/getAngleVel", 10, get_angle_vel_callback);
 
   ros::Rate loop_rate(30);
 
@@ -101,8 +101,8 @@ int main(int argc, char** argv) {
   // message declarations
   sensor_msgs::JointState joint_state;
 
-  float pos3 = 0;
-  float grip = 0;
+  int mode = 0;
+  float pos[4];
 
   while (ros::ok()) {
     //update joint_state
@@ -110,39 +110,44 @@ int main(int argc, char** argv) {
     joint_state.name.resize(5);
     joint_state.position.resize(5);
     joint_state.name[0] ="joint1";
-    joint_state.position[0] = -angles[0];
+    joint_state.position[0] = pos[0];
     joint_state.name[1] ="joint2";
-    joint_state.position[1] = -angles[1];
+    joint_state.position[1] = pos[1];
     joint_state.name[2] ="joint3";
-    joint_state.position[2] = pos3;
+    joint_state.position[2] = pos[2];
     joint_state.name[3] ="joint4";
-    joint_state.position[3] = grip;
+    joint_state.position[3] = pos[3];
     joint_state.name[4] ="joint5";
-    joint_state.position[4] = -grip;
-
-    if (gesture == 4) {
-      pos3 += 0.02;
-    }
-    else if (gesture == 5) {
-      pos3 -= 0.02;
-    }
-
-    if (gesture == 2) {
-      grip += 0.02;
-    }
-    else if (gesture == 3) {
-      grip -= 0.02;
+    joint_state.position[4] = -pos[3];
+/*
+    if (gesture == 6){
+      if (mode == 3){
+        mode = 1;
+      }
+      else{
+        mode += 1;
+      }
     }
 
+    if (mode == 1){
+      for(int i = 2; i < 7; i++){
 
-    float a0 = theta[i];
-    float a1 = thetadot[i];
-    float a2 = 3/(tf12^2)*(theta[i+1]-theta[i])-2/tf12*thetadot[i]-1/tf12*thetadot[i+1];
-    float a3 = -2/(tf12^3)*(theta[i+1]-theta[i])+1/(tf12^2)*(thetadot[i+1]+thetadot[i]);
-    float time = 1;
-    newtheta=a0+a1*t+a2*t.^2+a3*t.^3;
-    newthetaDot = a1+2*a2*t+3*a3*t.^2;
-    newthetaDotDot = 2*a2+6*a3*t;
+      }
+    }
+
+    if (mode == 3 || gesture == 2){
+      for
+      float tf = 1;
+      float a0 = theta[i];
+      float a1 = thetadot[i];
+      float a2 = 3/(pow(tf12,2)*(theta[i+1]-theta[i])-2/tf12*thetadot[i]-1/tf12*thetadot[i+1];
+      float a3 = -2/(tf12^3)*(theta[i+1]-theta[i])+1/(tf12^2)*(thetadot[i+1]+thetadot[i]);
+
+      newtheta=a0+a1*t+a2*t.^2+a3*t.^3;
+      newthetaDot = a1+2*a2*t+3*a3*t.^2;
+      newthetaDotDot = 2*a2+6*a3*t;
+    }
+*/
 
 
     //send the joint state and transform

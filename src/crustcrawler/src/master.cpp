@@ -54,19 +54,20 @@ void myo_raw_gest_str_callback(const std_msgs::String::ConstPtr& msg){
     }
   }
 }
-/*
+
 //Takes the current joint angles and velocities
 void get_angle_vel_callback(const std_msgs::Float64MultiArray::ConstPtr& msg){
   float data[] = msg->data;
   float theta[5];
   float thetadot[5];
-
-  for (int i = 0; i < 5; i+=2){
-    data[i] = theta[i];
-    data[i+1] = thetadot[i];
+  int j = 0;
+  for (int i = 0; i < 10; i+=2){
+    data[i] = theta[j];
+    data[i+1] = thetadot[j];
+    j++;
   }
 }
-*/
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "state_publisher");
   ros::NodeHandle n;
@@ -74,7 +75,7 @@ int main(int argc, char** argv) {
   ros::Publisher joint_pub = n.advertise<sensor_msgs::JointState>("joint_states", 1);
   ros::Subscriber pose_sub = n.subscribe("myo_raw/pose", 10, myo_raw_pose_callback);
   ros::Subscriber gest_str_sub = n.subscribe("myo_raw/myo_gest_str", 10, myo_raw_gest_str_callback);
-  //ros::Subscriber get_angle_vel = n.subscribe("/crustcrawler/getAngleVel", 10, get_angle_vel_callback);
+  ros::Subscriber get_angle_vel = n.subscribe("/crustcrawler/getAngleVel", 10, get_angle_vel_callback);
 
   ros::Rate loop_rate(30);
 
@@ -116,16 +117,16 @@ int main(int argc, char** argv) {
       grip -= 0.02;
     }
 
- /*
+
     float a0 = theta[i];
     float a1 = thetadot[i];
     float a2 = 3/(tf12^2)*(theta[i+1]-theta[i])-2/tf12*thetadot[i]-1/tf12*thetadot[i+1];
     float a3 = -2/(tf12^3)*(theta[i+1]-theta[i])+1/(tf12^2)*(thetadot[i+1]+thetadot[i]);
+    float time = 1;
+    newtheta=a0+a1*t+a2*t.^2+a3*t.^3;
+    newthetaDot = a1+2*a2*t+3*a3*t.^2;
+    newthetaDotDot = 2*a2+6*a3*t;
 
-    theta12=a012+a112*t12+a212*t12.^2+a312*t12.^3;
-    thetaDot12 = a112+2*a212*t12+3*a312*t12.^2;
-    thetaDotDot12 = 2*a212+6*a312*t12;
-*/
 
     //send the joint state and transform
     joint_pub.publish(joint_state);

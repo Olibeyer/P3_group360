@@ -4,11 +4,24 @@
 #include <std_msgs/String.h>
 #include <tf/transform_broadcaster.h>
 #include "std_msgs/Float64MultiArray.h"
+#include "math.h"
 
 using namespace std;
 
 float angles[3];
 uint8_t gesture = 0;
+
+struct Vector3
+{
+  float x;
+  float y;
+  float z;
+};
+
+
+Vector3 f_kin(Vector3 thetas);
+Vector3 inv_kin_closest(Vector3 position);
+
 
 //Takes the quaternions from the imu and calculates the roll, pitch and yaw
 void myo_raw_pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg){
@@ -67,6 +80,10 @@ void get_angle_vel_callback(const std_msgs::Float64MultiArray::ConstPtr& msg){
     j++;
   }
 }
+<<<<<<< HEAD
+=======
+*/
+>>>>>>> 4329c16904ef11c190a62d8236f99545fd7f4cb6
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "state_publisher");
@@ -140,4 +157,27 @@ int main(int argc, char** argv) {
 
 
   return 0;
+}
+
+
+
+Vector3 f_kin(Vector3 thetas)
+{
+  Vector3 result;
+  float pi = 3.14159;
+  result.x = (11*cos(thetas.x)*cos(thetas.y + pi/2))/50 - (3*cos(thetas.x)*sin(thetas.z)*sin(thetas.y + pi/2))/20 + (3*cos(thetas.x)*cos(thetas.z)*cos(thetas.y + pi/2))/20;
+  result.y = (11*cos(thetas.y + pi/2)*sin(thetas.x))/50 + (3*cos(thetas.z)*cos(thetas.y + pi/2)*sin(thetas.x))/20 - (3*sin(thetas.x)*sin(thetas.z)*sin(thetas.y + pi/2))/20;
+  result.z = (11*sin(thetas.y + pi/2))/50 + (3*cos(thetas.z)*sin(thetas.y + pi/2))/20 + (3*cos(thetas.y + pi/2)*sin(thetas.z))/20 + 11/200;
+
+  return result;
+}
+
+Vector3 inv_kin_closest(Vector3 position)
+{
+  Vector3 result;
+
+
+
+
+  return result;
 }

@@ -70,17 +70,21 @@ void myo_raw_gest_str_callback(const std_msgs::String::ConstPtr& msg){
 /*
 //Takes the current joint angles and velocities
 void get_angle_vel_callback(const std_msgs::Float64MultiArray::ConstPtr& msg){
-  float data[] = msg->data;
+  vector<double> *data = &msg->data;
   float theta[5];
   float thetadot[5];
-
-  for (int i = 0; i < 5; i+=2){
-    data[i] = theta[i];
-    data[i+1] = thetadot[i];
+  int j = 0;
+  for (int i = 0; i < 10; i+=2){
+    data[i] = theta[j];
+    data[i+1] = thetadot[j];
+    j++;
   }
 }
-*/
+<<<<<<< HEAD
+=======
 
+>>>>>>> 4329c16904ef11c190a62d8236f99545fd7f4cb6
+*/
 int main(int argc, char** argv) {
   ros::init(argc, argv, "state_publisher");
   ros::NodeHandle n;
@@ -97,8 +101,8 @@ int main(int argc, char** argv) {
   // message declarations
   sensor_msgs::JointState joint_state;
 
-  float pos3 = 0;
-  float grip = 0;
+  int mode = 0;
+  float pos[4];
 
   while (ros::ok()) {
     //update joint_state
@@ -106,40 +110,45 @@ int main(int argc, char** argv) {
     joint_state.name.resize(5);
     joint_state.position.resize(5);
     joint_state.name[0] ="joint1";
-    joint_state.position[0] = -angles[0];
+    joint_state.position[0] = pos[0];
     joint_state.name[1] ="joint2";
-    joint_state.position[1] = -angles[1];
+    joint_state.position[1] = pos[1];
     joint_state.name[2] ="joint3";
-    joint_state.position[2] = pos3;
+    joint_state.position[2] = pos[2];
     joint_state.name[3] ="joint4";
-    joint_state.position[3] = grip;
+    joint_state.position[3] = pos[3];
     joint_state.name[4] ="joint5";
-    joint_state.position[4] = -grip;
-
-    if (gesture == 4) {
-      pos3 += 0.02;
-    }
-    else if (gesture == 5) {
-      pos3 -= 0.02;
-    }
-
-    if (gesture == 2) {
-      grip += 0.02;
-    }
-    else if (gesture == 3) {
-      grip -= 0.02;
+    joint_state.position[4] = -pos[3];
+/*
+    if (gesture == 6){
+      if (mode == 3){
+        mode = 1;
+      }
+      else{
+        mode += 1;
+      }
     }
 
- /*
-    float a0 = theta[i];
-    float a1 = thetadot[i];
-    float a2 = 3/(tf12^2)*(theta[i+1]-theta[i])-2/tf12*thetadot[i]-1/tf12*thetadot[i+1];
-    float a3 = -2/(tf12^3)*(theta[i+1]-theta[i])+1/(tf12^2)*(thetadot[i+1]+thetadot[i]);
+    if (mode == 1){
+      for(int i = 2; i < 7; i++){
 
-    theta12=a012+a112*t12+a212*t12.^2+a312*t12.^3;
-    thetaDot12 = a112+2*a212*t12+3*a312*t12.^2;
-    thetaDotDot12 = 2*a212+6*a312*t12;
+      }
+    }
+
+    if (mode == 3 || gesture == 2){
+      for
+      float tf = 1;
+      float a0 = theta[i];
+      float a1 = thetadot[i];
+      float a2 = 3/(pow(tf12,2)*(theta[i+1]-theta[i])-2/tf12*thetadot[i]-1/tf12*thetadot[i+1];
+      float a3 = -2/(tf12^3)*(theta[i+1]-theta[i])+1/(tf12^2)*(thetadot[i+1]+thetadot[i]);
+
+      newtheta=a0+a1*t+a2*t.^2+a3*t.^3;
+      newthetaDot = a1+2*a2*t+3*a3*t.^2;
+      newthetaDotDot = 2*a2+6*a3*t;
+    }
 */
+
 
     //send the joint state and transform
     joint_pub.publish(joint_state);

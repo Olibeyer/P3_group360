@@ -20,7 +20,7 @@ struct Vector3
 
 
 Vector3 f_kin(Vector3 thetas);
-Vector3 inv_kin_closest(Vector3 position);
+Vector3 inv_kin_closest(Vector3 position, Vector3 angles);
 
 
 //Takes the quaternions from the imu and calculates the roll, pitch and yaw
@@ -168,12 +168,51 @@ Vector3 f_kin(Vector3 thetas)
   return result;
 }
 
-Vector3 inv_kin_closest(Vector3 position)
+Vector3 inv_kin_closest(Vector3 pos, Vector3 angles)
 {
-  Vector3 result;
+  //constants
+  float pi = 3.14159;
+  float L2 = 0.150;
+  float L1 = 0.220;
+  float z1 = 0.055;
+
+  //extra angles and lenghs
+  float a1 = sqrt(pos.x*pos.x + pos.y*pos.y);
+  float d1 = sqrt(pow((pos.z-z1),2) + a1*a1);
+
+  //more angles to calculate a solution
+  float alpha = acos((d1*d1 + L1*L1 - L2*L2)/(2*L1*d1));
+  float beta = acos((L1*L1 + L2*L2 - d1*d1)/(2*L1*L2));
+  float delta = atan2((pos.z - z1),a1);
 
 
+  //calculate the four solutions
+  Vector3 solutions[4];
+
+  solutions[0].x = atan2(pos.y,pos.x) + pi;
+  solutions[0].y = (pi/2)-(alpha+delta);
+  solutions[0].z = pi-beta;
+
+  solutions[1].x = atan2(pos.y,pos.x);
+  solutions[1].y = (-pi/2)+(alpha+delta);
+  solutions[1].z = -pi+beta;
+
+  solutions[2].x = atan2(pos.y,pos.x);
+  solutions[2].y = (-pi/2)-(alpha-delta);
+  solutions[2].z = pi-beta;
+
+  solutions[3].x = atan2(pos.y,pos.x) + pi;
+  solutions[3].y = -((-pi/2)-(alpha-delta));
+  solutions[3].z = -pi+beta;
+
+  //find the closest solution:
+
+  float distance[4];
+
+  for (size_t i = 0; i < 4; i++) {
+
+  }
 
 
-  return result;
+  return solutions[0];
 }

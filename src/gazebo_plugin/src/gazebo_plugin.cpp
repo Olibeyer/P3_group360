@@ -85,7 +85,7 @@ public:
             for (int i = 0; i < 5; i++)
             {
                 int dataIndex = (i * 2);
-                double currentErrorPose = joints[i]->Position(0);
+                double currentErrorPose = joints[i]->Position(2);
                 msg.data[dataIndex] = currentErrorPose;
                 msg.data[dataIndex + 1] = jointsLastAngle[i] - currentErrorPose;
                 jointsLastAngle[i] = currentErrorPose;

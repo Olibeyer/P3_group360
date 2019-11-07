@@ -21,6 +21,7 @@ struct Vector3
 
 Vector3 f_kin(Vector3 thetas);
 Vector3 inv_kin_closest(Vector3 position, Vector3 angles);
+void check_for_zero(Vector3 &input);
 
 
 //Takes the quaternions from the imu and calculates the roll, pitch and yaw
@@ -166,19 +167,33 @@ int main(int argc, char** argv) {
 
 
 
+void check_for_zero(Vector3 &input)
+{
+  float zero_value = 0.0001;
+  if (input.x == 0.0)
+    input.x = zero_value;
+  if (input.y == 0.0)
+    input.y = zero_value;
+  if (input.z == 0.0)
+    input.z = zero_value;
+}
+
 Vector3 f_kin(Vector3 thetas)
 {
   Vector3 result;
-  float pi = 3.14159;
+  float pi = 3.1416;
   result.x = (11*cos(thetas.x)*cos(thetas.y + pi/2))/50 - (3*cos(thetas.x)*sin(thetas.z)*sin(thetas.y + pi/2))/20 + (3*cos(thetas.x)*cos(thetas.z)*cos(thetas.y + pi/2))/20;
   result.y = (11*cos(thetas.y + pi/2)*sin(thetas.x))/50 + (3*cos(thetas.z)*cos(thetas.y + pi/2)*sin(thetas.x))/20 - (3*sin(thetas.x)*sin(thetas.z)*sin(thetas.y + pi/2))/20;
-  result.z = (11*sin(thetas.y + pi/2))/50 + (3*cos(thetas.z)*sin(thetas.y + pi/2))/20 + (3*cos(thetas.y + pi/2)*sin(thetas.z))/20 + 11/200;
+  result.z = (11*sin(thetas.y + pi/2))/50 + (3*cos(thetas.z)*sin(thetas.y + pi/2))/20 + (3*cos(thetas.y + pi/2)*sin(thetas.z))/20 + 11.0/200.0;
 
   return result;
 }
 
 Vector3 inv_kin_closest(Vector3 pos, Vector3 angles)
 {
+  check_for_zero(angles);
+  check_for_zero(pos);
+
   //constants
   float pi = 3.14159;
   float L2 = 0.150;
@@ -187,13 +202,25 @@ Vector3 inv_kin_closest(Vector3 pos, Vector3 angles)
 
   //extra angles and lenghs
   float a1 = sqrt(pos.x*pos.x + pos.y*pos.y);
-  float d1 = sqrt(pow((pos.z-z1),2) + a1*a1);
+  float d1 = sqrt((pos.z-z1)*(pos.z-z1) + a1*a1);
 
   //more angles to calculate a solution
   float alpha = acos((d1*d1 + L1*L1 - L2*L2)/(2*L1*d1));
-  float beta = acos((L1*L1 + L2*L2 - d1*d1)/(2*L1*L2));
-  float delta = atan2((pos.z - z1),a1);
+  float tmp = (L1*L1 + L2*L2 - d1*d1)/(2*L1*L2);
+  if(tmp < -1.0)
+    if(tmp + 1.0 < -0.00001)
+      std::cout << "ACOS FAILURE, LESS THAN -1, OUT OF REACH? MAYBE?" << std::endl;
+    else
+      tmp = -1.0;
+  if(tmp > 1.0)
+    if(tmp - 1.0 > 0.00001)
+      std::cout << "ACOS FAILURE, GREATER THAN 1, OUT OF REACH? MAYBE?" << std::endl;
+    else
+      tmp = 1.0;
 
+
+  float beta = acos(tmp);
+  float delta = atan2((pos.z - z1),a1);
 
   //calculate the four solutions
   Vector3 solutions[4];
@@ -219,9 +246,18 @@ Vector3 inv_kin_closest(Vector3 pos, Vector3 angles)
   float distance[4];
 
   for (size_t i = 0; i < 4; i++) {
-
+    distance[i] = 0;
+    distance[i] += std::abs(solutions[i].x - angles.x);
+    distance[i] += std::abs(solutions[i].y - angles.y);
+    distance[i] += std::abs(solutions[i].z - angles.z);
   }
 
+  int lowest = 0;
 
-  return solutions[0];
+  for (size_t i = 0; i < 4; i++) {
+    if(distance[i] < distance[lowest])
+      lowest = i;
+  }
+
+  return solutions[lowest];
 }

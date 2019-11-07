@@ -79,7 +79,7 @@ void myo_raw_gest_str_callback(const std_msgs::String::ConstPtr& msg){
   }
 }
 
-
+//Calculates the trajectory and publishes
 void calc_traj(){
   float t = ros::Time::now().sec - gen_time.sec;
   std_msgs::Float64MultiArray trajectories;
@@ -97,8 +97,8 @@ void get_angle_vel_callback(const std_msgs::Float64MultiArray::ConstPtr& msg){
   vector<double> data = msg->data;
   int j = 0;
   for (int i = 0; i < 10; i+=2){
-    data[i] = theta[j];
-    data[i+1] = thetadot[j];
+    theta[j] = data[i];
+    thetadot[j] = data[i+1];
     j++;
   }
   calc_traj();
@@ -119,8 +119,10 @@ int main(int argc, char** argv) {
   // message declarations
   sensor_msgs::JointState joint_state;
 
+  ros::spinOnce();
+
   int mode = 0;
-  float pos[4];
+  float pos[4] = {theta[0],theta[1],theta[2],theta[3]};
   float move_pose = 0.02;
   gen_time = ros::Time::now();
 
@@ -196,7 +198,6 @@ int main(int argc, char** argv) {
 // updeate and check for news in the subscribers
     ros::spinOnce();
   }
-
 
   return 0;
 }

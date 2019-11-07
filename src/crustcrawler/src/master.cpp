@@ -8,8 +8,17 @@
 
 using namespace std;
 
-float angles[3];
+//float angles[3];
 uint8_t gesture = 0;
+float theta[5];
+float thetadot[5];
+ros::Time gen_time;
+float a0[4];
+float a1[4];
+float a2[4];
+float a3[4];
+ros::Publisher trajectory_pub;
+
 
 struct Vector3
 {
@@ -22,7 +31,7 @@ struct Vector3
 Vector3 f_kin(Vector3 thetas);
 Vector3 inv_kin_closest(Vector3 position);
 
-
+/*
 //Takes the quaternions from the imu and calculates the roll, pitch and yaw
 void myo_raw_pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg){
   float x = msg->pose.orientation.x;
@@ -53,7 +62,7 @@ void myo_raw_pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg){
   angles[1] = pitch;
   angles[2] = yaw;
 }
-
+*/
 //checks what gesture the myo detects
 void myo_raw_gest_str_callback(const std_msgs::String::ConstPtr& msg){
   string data = msg->data;
@@ -67,19 +76,33 @@ void myo_raw_gest_str_callback(const std_msgs::String::ConstPtr& msg){
     }
   }
 }
-/*
+
+
+void calc_traj(){
+  float t = ros::Time::now().sec - gen_time.sec;
+  std_msgs::Float64MultiArray trajectories;
+  trajectories.data.resize(12);
+  for (int i = 0; i < 4; i++) {
+    trajectories.data[i*4] = a0[i]+a1[i]*t+a2[i]*pow(t,2)+a3[i]*pow(t,3);
+    trajectories.data[i*4+1] = a1[i]+2*a2[i]*t+3*a3[i]*pow(t,2);
+    trajectories.data[i*4+2] = 2*a2[i]+6*a3[i]*t;
+  }
+  trajectory_pub.publish(trajectories);
+}
+
 //Takes the current joint angles and velocities
 void get_angle_vel_callback(const std_msgs::Float64MultiArray::ConstPtr& msg){
-  vector<double> *data = &msg->data;
-  float theta[5];
-  float thetadot[5];
+  vector<double> data = msg->data;
   int j = 0;
   for (int i = 0; i < 10; i+=2){
     data[i] = theta[j];
     data[i+1] = thetadot[j];
     j++;
   }
+  calc_traj();
 }
+
+/*
 <<<<<<< HEAD
 =======
 
@@ -89,12 +112,13 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "state_publisher");
   ros::NodeHandle n;
 
+  trajectory_pub = n.advertise<std_msgs::Float64MultiArray>("/crustcrawler/trajectory",1);
   ros::Publisher joint_pub = n.advertise<sensor_msgs::JointState>("joint_states", 1);
-  ros::Subscriber pose_sub = n.subscribe("myo_raw/pose", 10, myo_raw_pose_callback);
+  //ros::Subscriber pose_sub = n.subscribe("myo_raw/pose", 10, myo_raw_pose_callback);
   ros::Subscriber gest_str_sub = n.subscribe("myo_raw/myo_gest_str", 10, myo_raw_gest_str_callback);
-  //ros::Subscriber get_angle_vel = n.subscribe("/crustcrawler/getAngleVel", 10, get_angle_vel_callback);
+  ros::Subscriber get_angle_vel = n.subscribe("/crustcrawler/getAngleVel", 10, get_angle_vel_callback);
 
-  ros::Rate loop_rate(30);
+  ros::Rate loop_rate(1);
 
   //const double degree = M_PI/180;
 
@@ -103,8 +127,50 @@ int main(int argc, char** argv) {
 
   int mode = 0;
   float pos[4];
+  float move_pose = 0.02;
 
   while (ros::ok()) {
+    gen_time = ros::Time::now();
+
+    if (gesture == 6){
+      if (mode == 3){
+        mode = 1;
+      }
+      else{
+        mode += 1;
+      }
+      ROS_INFO_STREAM(mode);
+    }
+    if(gesture != 0 && gesture != 1 && gesture != 6){
+      switch (mode) {
+        case 1: switch(gesture){
+          case 2: pos[0] += move_pose; break;
+          case 3: pos[0] -= move_pose; break;
+          case 4: pos[1] += move_pose; break;
+          case 5: pos[1] -= move_pose; break;
+        } break;
+        case 2: switch(gesture){
+          case 2: pos[2] += move_pose; break;
+          case 3: pos[2] -= move_pose; break;
+          case 4: pos[3] += move_pose; break;
+          case 5: pos[3] -= move_pose; break;
+        } break;
+        case 3: switch(gesture){
+          case 2:
+            float goalang[4] = {0,0,0,0};
+            float goalvel[4] = {0,0,0,0};
+            for (size_t i = 0; i < 4; i++) {
+            float tf = 1;
+            a0[i] = theta[i];
+            a1[i] = thetadot[i];
+            a2[i] = 3/(pow(tf,2))*(goalang[i]-theta[i])-2/tf*thetadot[i]-1/tf*goalvel[i];
+            a3[i] = -2/(pow(tf,3))*(goalang[i]-theta[i])+1/(pow(tf,2))*(goalvel[i]+thetadot[i]);
+
+          } break;
+        } break;
+      }
+    }
+
     //update joint_state
     joint_state.header.stamp = ros::Time::now();
     joint_state.name.resize(5);
@@ -119,44 +185,14 @@ int main(int argc, char** argv) {
     joint_state.position[3] = pos[3];
     joint_state.name[4] ="joint5";
     joint_state.position[4] = -pos[3];
-/*
-    if (gesture == 6){
-      if (mode == 3){
-        mode = 1;
-      }
-      else{
-        mode += 1;
-      }
-    }
 
-    if (mode == 1){
-      for(int i = 2; i < 7; i++){
-
-      }
-    }
-
-    if (mode == 3 || gesture == 2){
-      for
-      float tf = 1;
-      float a0 = theta[i];
-      float a1 = thetadot[i];
-      float a2 = 3/(pow(tf12,2)*(theta[i+1]-theta[i])-2/tf12*thetadot[i]-1/tf12*thetadot[i+1];
-      float a3 = -2/(tf12^3)*(theta[i+1]-theta[i])+1/(tf12^2)*(thetadot[i+1]+thetadot[i]);
-
-      newtheta=a0+a1*t+a2*t.^2+a3*t.^3;
-      newthetaDot = a1+2*a2*t+3*a3*t.^2;
-      newthetaDotDot = 2*a2+6*a3*t;
-    }
-*/
-
-
-    //send the joint state and transform
+//send the joint state and transform
     joint_pub.publish(joint_state);
 
-    // updeate and check for news in the subscribers
+// updeate and check for news in the subscribers
     ros::spinOnce();
 
-    // This will adjust as needed per iteration
+// This will adjust as needed per iteration
     loop_rate.sleep();
   }
 

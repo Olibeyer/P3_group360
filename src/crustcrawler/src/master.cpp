@@ -64,6 +64,7 @@ void myo_raw_pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg){
   angles[2] = yaw;
 }
 */
+
 //checks what gesture the myo detects
 void myo_raw_gest_str_callback(const std_msgs::String::ConstPtr& msg){
   string data = msg->data;
@@ -103,12 +104,6 @@ void get_angle_vel_callback(const std_msgs::Float64MultiArray::ConstPtr& msg){
   calc_traj();
 }
 
-/*
-<<<<<<< HEAD
-=======
-
->>>>>>> 4329c16904ef11c190a62d8236f99545fd7f4cb6
-*/
 int main(int argc, char** argv) {
   ros::init(argc, argv, "state_publisher");
   ros::NodeHandle n;
@@ -119,8 +114,6 @@ int main(int argc, char** argv) {
   ros::Subscriber gest_str_sub = n.subscribe("myo_raw/myo_gest_str", 10, myo_raw_gest_str_callback);
   ros::Subscriber get_angle_vel = n.subscribe("/crustcrawler/getAngleVel", 10, get_angle_vel_callback);
 
-  ros::Rate loop_rate(1);
-
   //const double degree = M_PI/180;
 
   // message declarations
@@ -129,46 +122,56 @@ int main(int argc, char** argv) {
   int mode = 0;
   float pos[4];
   float move_pose = 0.02;
+  gen_time = ros::Time::now();
 
-  while (ros::ok()) {
-    gen_time = ros::Time::now();
+  while (ros::ok()){
 
-    if (gesture == 6){
-      if (mode == 3){
-        mode = 1;
+    if(ros::Time::now().sec - gen_time.sec >= 1.0){
+      gen_time = ros::Time::now();
+
+      if (gesture == 6){
+        if (mode == 3){
+          mode = 1;
+        }
+        else{
+          mode += 1;
+        }
+        ROS_INFO_STREAM(mode);
       }
-      else{
-        mode += 1;
-      }
-      ROS_INFO_STREAM(mode);
-    }
-    if(gesture != 0 && gesture != 1 && gesture != 6){
-      switch (mode) {
-        case 1: switch(gesture){
-          case 2: pos[0] += move_pose; break;
-          case 3: pos[0] -= move_pose; break;
-          case 4: pos[1] += move_pose; break;
-          case 5: pos[1] -= move_pose; break;
-        } break;
-        case 2: switch(gesture){
-          case 2: pos[2] += move_pose; break;
-          case 3: pos[2] -= move_pose; break;
-          case 4: pos[3] += move_pose; break;
-          case 5: pos[3] -= move_pose; break;
-        } break;
-        case 3: switch(gesture){
-          case 2:
-            float goalang[4] = {0,0,0,0};
-            float goalvel[4] = {0,0,0,0};
-            for (size_t i = 0; i < 4; i++) {
-            float tf = 1;
-            a0[i] = theta[i];
-            a1[i] = thetadot[i];
-            a2[i] = 3/(pow(tf,2))*(goalang[i]-theta[i])-2/tf*thetadot[i]-1/tf*goalvel[i];
-            a3[i] = -2/(pow(tf,3))*(goalang[i]-theta[i])+1/(pow(tf,2))*(goalvel[i]+thetadot[i]);
-
-          } break;
-        } break;
+      if(gesture != 0 && gesture != 1 && gesture != 6){
+        switch (mode) {
+          case 1: 
+            switch(gesture){
+              case 2: pos[0] += move_pose; break;
+              case 3: pos[0] -= move_pose; break;
+              case 4: pos[1] += move_pose; break;
+              case 5: pos[1] -= move_pose; break;
+            } 
+          break;
+          case 2: 
+            switch(gesture){
+              case 2: pos[2] += move_pose; break;
+              case 3: pos[2] -= move_pose; break;
+              case 4: pos[3] += move_pose; break;
+              case 5: pos[3] -= move_pose; break;
+            }
+          break;
+          case 3: 
+            switch(gesture){
+              case 2:
+                float goalang[4] = {0,0,0,0};
+                float goalvel[4] = {0,0,0,0};
+                for (size_t i = 0; i < 4; i++) {
+                  float tf = 1;
+                  a0[i] = theta[i];
+                  a1[i] = thetadot[i];
+                  a2[i] = 3/(pow(tf,2))*(goalang[i]-theta[i])-2/tf*thetadot[i]-1/tf*goalvel[i];
+                  a3[i] = -2/(pow(tf,3))*(goalang[i]-theta[i])+1/(pow(tf,2))*(goalvel[i]+thetadot[i]);
+                }
+              break;
+            } 
+          break;
+        }
       }
     }
 
@@ -192,9 +195,6 @@ int main(int argc, char** argv) {
 
 // updeate and check for news in the subscribers
     ros::spinOnce();
-
-// This will adjust as needed per iteration
-    loop_rate.sleep();
   }
 
 
@@ -206,12 +206,15 @@ int main(int argc, char** argv) {
 void check_for_zero(Vector3 &input)
 {
   float zero_value = 0.0001;
-  if (input.x == 0.0)
+  if (input.x == 0.0){
     input.x = zero_value;
-  if (input.y == 0.0)
+  }
+  if (input.y == 0.0){
     input.y = zero_value;
-  if (input.z == 0.0)
+  }
+  if (input.z == 0.0){
     input.z = zero_value;
+  }
 }
 
 Vector3 f_kin(Vector3 thetas)
@@ -225,8 +228,7 @@ Vector3 f_kin(Vector3 thetas)
   return result;
 }
 
-Vector3 inv_kin_closest(Vector3 pos, Vector3 angles)
-{
+Vector3 inv_kin_closest(Vector3 pos, Vector3 angles){
   check_for_zero(angles);
   check_for_zero(pos);
 
@@ -243,17 +245,22 @@ Vector3 inv_kin_closest(Vector3 pos, Vector3 angles)
   //more angles to calculate a solution
   float alpha = acos((d1*d1 + L1*L1 - L2*L2)/(2*L1*d1));
   float tmp = (L1*L1 + L2*L2 - d1*d1)/(2*L1*L2);
-  if(tmp < -1.0)
-    if(tmp + 1.0 < -0.00001)
+  if(tmp < -1.0){
+    if(tmp + 1.0 < -0.00001){
       std::cout << "ACOS FAILURE, LESS THAN -1, OUT OF REACH? MAYBE?" << std::endl;
-    else
+    }
+    else{
       tmp = -1.0;
-  if(tmp > 1.0)
-    if(tmp - 1.0 > 0.00001)
+    }
+  }
+  if(tmp > 1.0){
+    if(tmp - 1.0 > 0.00001){
       std::cout << "ACOS FAILURE, GREATER THAN 1, OUT OF REACH? MAYBE?" << std::endl;
-    else
+    }
+    else{
       tmp = 1.0;
-
+      }
+    }
 
   float beta = acos(tmp);
   float delta = atan2((pos.z - z1),a1);
